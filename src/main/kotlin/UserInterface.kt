@@ -10,10 +10,9 @@ enum class CommandNames(val argc: Int) {
     Fetch(1),
     Delete(1),
     Store(2),
-    NewDB(1),
-    DelDB(1),
-    Open(1),
-    Rename(2);
+    Create(1),
+    DelDB(0),
+    Open(1);
 
     override fun toString(): String {
         return name.lowercase()
@@ -32,27 +31,34 @@ fun printHelp() {
     println(File("src/files/HelpMessage.txt").readText())
 }
 
-/**
- * Processes given command.
- * Returns true if the program must be closed
- */
-fun processCommand(command: Command): Boolean {
-    try {
-        when (command.commandName) {
-            CommandNames.Quit -> return true
-            CommandNames.Help -> printHelp()
-            CommandNames.Fetch -> TODO()
-            CommandNames.Delete -> TODO()
-            CommandNames.Store -> TODO()
-            CommandNames.NewDB -> TODO()
-            CommandNames.DelDB -> TODO()
-            CommandNames.Open -> TODO()
-            CommandNames.Rename -> TODO()
-        }
-    } catch (e: Exception) {
-        println(e.message)
-    }
-    return false
+fun runFetch(database: DataBase, arguments: List<String>) {
+    val result = database.fetch(arguments[0]) ?: throw Exception("No item \"${arguments[0]}\" in database")
+    println(result)
+}
+
+fun runDelete(database: DataBase, arguments: List<String>) {
+    database.deleteKey(arguments[0])
+}
+
+fun runStore(database: DataBase, arguments: List<String>) {
+    database.store(arguments[0], arguments[1])
+}
+
+fun runCreate(arguments: List<String>): DataBase {
+    val database = DataBase(arguments[0])
+    database.create()
+    return database
+}
+
+fun runDelDB(database: DataBase): DataBase {
+    database.deleteDB()
+    return database
+}
+
+fun runOpen(arguments: List<String>): DataBase {
+    val database = DataBase(arguments[0])
+    database.open()
+    return database
 }
 
 /**
@@ -121,7 +127,7 @@ fun getCommand(): Command {
             commandName = it
     }
     if (commandName == null)
-        throw Exception("Command \"$commandName\" doesn't exist. Use \"help\" to see possible commands\"")
+        throw Exception("Command \"$commandNameString\" doesn't exist. Use \"help\" to see possible commands")
     // check arguments count
     if (commandName!!.argc != list.size - 1)
         throw Exception(
@@ -137,11 +143,21 @@ fun getCommand(): Command {
  * Gets and processes commands from user
  */
 fun runShell() {
+    var database = DataBase()
     while (true) {
+        print("${if (database.isOpened) database.path else "KVDB"}> ")
         try {
             val command = getCommand()
-            if (processCommand(command))
-                return
+            when (command.commandName) {
+                CommandNames.Quit -> break
+                CommandNames.Help -> printHelp()
+                CommandNames.Fetch -> runFetch(database, command.arguments)
+                CommandNames.Delete -> runDelete(database, command.arguments)
+                CommandNames.Store -> runStore(database, command.arguments)
+                CommandNames.Create -> database = runCreate(command.arguments)
+                CommandNames.DelDB -> database = runDelDB(database)
+                CommandNames.Open -> database = runOpen(command.arguments)
+            }
         } catch (e: Exception) {
             println(e.message)
         }

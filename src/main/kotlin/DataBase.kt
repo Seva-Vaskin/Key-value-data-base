@@ -8,13 +8,16 @@ data class Bucket(val map: MutableMap<String, String>, val hash: Int)
 /**
  * Describes database object
  */
-class DataBase(private var path: String = "") {
+class DataBase(_path: String = "") {
+    var path = _path
+        private set
     private fun sizeFile() = File("$path/size")
     private val nameExtension = ".db"
     val splitChar = '\t'
     var size = -1
         private set
-    private var isOpened = false
+    var isOpened = false
+        private set
 
     init {
         fixName()
