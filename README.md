@@ -48,5 +48,12 @@ b.db> fetch key
 No item "key" in database
 b.db> delDB
 KVDB> quit
-
 ```
+
+## Testing
+This utility was tested with test in file `src/test/kotlin/TestBigDataBase.kt`
+So, it did 10^5 Sequentially `store` operations,
+then 10^5 `fetch` operations,
+then 10^5 `delete` operations 
+for 3 minutes and 10 seconds
+(On HDD)
