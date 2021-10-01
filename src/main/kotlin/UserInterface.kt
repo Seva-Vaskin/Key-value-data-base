@@ -2,7 +2,7 @@ import java.io.File
 
 /**
  * Describes possible user's command names for the program.
- * Args means number of arguments needed to each command
+ * argc means number of arguments needed for each command
  */
 enum class CommandNames(val argc: Int) {
     Quit(0),
