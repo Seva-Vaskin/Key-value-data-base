@@ -94,12 +94,11 @@ class DataBase(_path: String = "") {
      */
     private fun uploadBucket(bucket: Bucket) {
         val file = File("$path/${bucket.hash}")
-        if (!file.exists())
+        file.delete()
+        if (bucket.map.isNotEmpty())
             file.createNewFile()
-        if (bucket.map.isEmpty())
-            file.delete()
         bucket.map.forEach { (key, value) ->
-            file.writeText("$key$splitChar$value\n")
+            file.appendText("$key$splitChar$value\n")
         }
     }
 
