@@ -1,10 +1,12 @@
-import java.io.File
-
-
 fun main(args: Array<String>) {
     if ("--help" in args) {
-        println(File("src/files/HelpMessage.txt").readText())
+        printHelp()
         return
     }
-
+    try {
+        runShell()
+    } catch (e: Exception) {
+        System.err.println("Something went wrong :(")
+        System.err.println(e.message)
+    }
 }
