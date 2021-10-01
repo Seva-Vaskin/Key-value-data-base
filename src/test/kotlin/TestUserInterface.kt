@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import kotlin.test.BeforeTest
 import kotlin.test.AfterTest
+import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
 internal class TestUserInterface {
@@ -20,6 +21,71 @@ internal class TestUserInterface {
     fun tearDown() {
         System.setOut(standardOut)
         System.setIn(standardIn)
+    }
+
+    @Test
+    fun testSplit_OneArgument() {
+        val string = "FirstArg"
+        val actual = Split(string)
+        val expected = listOf("FirstArg")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSplit_ManyArguments() {
+        val string = "1stArg 2ndArg 3rdArg"
+        val actual = Split(string)
+        val expected = listOf("1stArg", "2ndArg", "3rdArg")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSplit_QuotesArguments() {
+        val string = "\"1 st\" \"sec ond\""
+        val actual = Split(string)
+        val expected = listOf("1 st", "sec ond")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSplit_QuotesAndBasicArguments() {
+        val string = "1st \"2nd\""
+        val actual = Split(string)
+        val expected = listOf("1st", "2nd")
+        assertEquals(expected, actual)
+    }
+
+
+    @Test
+    fun testSplit_ExtraSpaces() {
+        val string = " \"1 s  t\"  2nd  3rd  "
+        val actual = Split(string)
+        val expected = listOf("1 s  t", "2nd", "3rd")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSplit_SpecialSymbolsInArguments() {
+        val string = "1st\\\\first \\\"second\\\""
+        val actual = Split(string)
+        val expected = listOf("1st\\first", "\"second\"")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSplit_UnexpectedQuotes() {
+        val string = "1st \"second"
+        assertFails {
+            Split(string)
+        }
+    }
+
+    @Test
+    fun testSplit_UnexpectedBackslash() {
+        val string = "1st 2nd\\"
+        assertFails {
+            Split(string)
+        }
     }
 
     @Test

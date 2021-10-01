@@ -40,7 +40,7 @@ fun processCommand(command: Command): Boolean {
     try {
         when (command.commandName) {
             CommandNames.Quit -> return true
-            CommandNames.Help -> TODO()
+            CommandNames.Help -> printHelp()
             CommandNames.Fetch -> TODO()
             CommandNames.Delete -> TODO()
             CommandNames.Store -> TODO()
@@ -55,6 +55,52 @@ fun processCommand(command: Command): Boolean {
     return false
 }
 
+/**
+ * Splits string of arguments to list of arguments
+ * 1) It splits arguments by space symbol
+ * 2) It parses strings in double quotes to one argument
+ * Note: Use \" to write double quotes inside argument
+ * Note: Use \\ to write backslash symbol
+ */
+fun Split(str: String): List<String> {
+    val builder = StringBuilder()
+    val list = mutableListOf<String>()
+    var isWaitingQuotes = false
+    var isAfterBackslash = false
+    str.forEach {
+        when {
+            isAfterBackslash -> {
+                builder.append(it)
+                isAfterBackslash = false
+            }
+            isWaitingQuotes && it == '"' -> {
+                isWaitingQuotes = false
+                if (builder.isEmpty()) {
+                    throw Exception("Can't use empty string as argument")
+                }
+                list.add(builder.toString())
+                builder.clear()
+            }
+            it == '\\' -> isAfterBackslash = true
+            it == '"' -> isWaitingQuotes = true
+            it == ' ' && !isWaitingQuotes -> {
+                if (builder.isNotEmpty())
+                    list.add(builder.toString())
+                builder.clear()
+            }
+            else -> builder.append(it)
+        }
+    }
+    if (isWaitingQuotes) {
+        throw Exception("Quotes aren't closed. Note: use \\\" to use \" as symbol in text")
+    }
+    if (isAfterBackslash) {
+        throw Exception("Unexpected \\ symbol. Note: use \\\\ to write \\ symbol")
+    }
+    if (builder.isNotEmpty())
+        list.add(builder.toString())
+    return list
+}
 
 /**
  * Gets command from console.
@@ -64,7 +110,7 @@ fun getCommand(): Command {
     // get command from input
     val commandString: String = readLine() ?: throw Exception("Can't read command")
     // make list from input string
-    val list = commandString.split(' ')
+    val list = Split(commandString)
     if (list.isEmpty())
         throw Exception("Can't process an empty command")
     // Determine a command name
