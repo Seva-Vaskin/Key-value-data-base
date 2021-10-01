@@ -16,6 +16,10 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.5.31")
 }
 
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
+
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
